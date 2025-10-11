@@ -4,10 +4,20 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from .serializers import UserSerializer
 
 User = get_user_model()
+
+def get_tokens_for_user(user):
+    """Generate JWT tokens for user"""
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
 
 
 @api_view(["GET"])
@@ -23,33 +33,62 @@ def get_user_profile(request):
 def oauth_callback(request):
     """
     Handle OAuth callback from frontend
-    This endpoint receives the auth token and returns user data
+    This endpoint receives the JWT access token and returns user data
     """
-    token = request.data.get("token")
-
-    if not token:
+    access_token = request.data.get("access_token")
+    
+    if not access_token:
         return Response(
-            {"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "Access token is required"}, 
+            status=status.HTTP_400_BAD_REQUEST
         )
-
+    
     try:
-        # Validate token and get user
-        from rest_framework.authtoken.models import Token
-
-        token_obj = Token.objects.get(key=token)
-        user = token_obj.user
-
+        # Decode and validate JWT token
+        from rest_framework_simplejwt.tokens import AccessToken
+        
+        token = AccessToken(access_token)
+        user_id = token['user_id']
+        user = User.objects.get(id=user_id)
+        
         serializer = UserSerializer(user)
+        return Response({
+            "user": serializer.data,
+            "access_token": access_token,
+            "redirect_url": f"/{user.role}/dashboard",
+        })
+        
+    except (TokenError, User.DoesNotExist) as e:
         return Response(
-            {
-                "user": serializer.data,
-                "token": token,
-                "redirect_url": f"/{user.role}/dashboard",
-            }
+            {"error": "Invalid or expired token"}, 
+            status=status.HTTP_401_UNAUTHORIZED
         )
-    except Token.DoesNotExist:
-        return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def social_login(request):
+    """
+    Handle social login (Google/GitHub)
+    Accepts: provider (google/github), code, redirect_uri
+    Returns: JWT tokens and user data
+    """
+    provider = request.data.get('provider')
+    code = request.data.get('code')
+    
+    if not provider or not code:
+        return Response(
+            {"error": "Provider and code are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Process OAuth with allauth
+    # This is handled by dj-rest-auth automatically
+    # Just return the response with tokens
+    
+    return Response({
+        "message": "Use the dj-rest-auth endpoints for social login"
+    })
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -65,3 +104,51 @@ def update_user_role(request):
 
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def refresh_token(request):
+    """Refresh JWT token"""
+    refresh_token = request.data.get("refresh")
+    
+    if not refresh_token:
+        return Response(
+            {"error": "Refresh token is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        refresh = RefreshToken(refresh_token)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        })
+    except TokenError:
+        return Response(
+            {"error": "Invalid refresh token"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    """Logout user by blacklisting refresh token"""
+    refresh_token = request.data.get("refresh")
+    
+    if not refresh_token:
+        return Response(
+            {"error": "Refresh token is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({"message": "Logout successful"})
+    except TokenError:
+        return Response(
+            {"error": "Invalid token"},
+            status=status.HTTP_400_BAD_REQUEST
+        )

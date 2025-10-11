@@ -17,9 +17,22 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
+from dj_rest_auth.registration.views import SocialConnectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+
+
+# Google OAuth
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+
+# GitHub OAuth  
+class GitHubLogin(SocialLoginView):
+    adapter_class = GitHubOAuth2Adapter
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -35,6 +48,11 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     # path('api/', include('your_app.urls')),  # <-- your APIs here
+    
+    # Social auth endpoints
+    path("api/auth/google/", GoogleLogin.as_view(), name="google_login"),
+    path("api/auth/github/", GitHubLogin.as_view(), name="github_login"),
+
     # Swagger / ReDoc documentation
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
@@ -48,7 +66,6 @@ urlpatterns = [
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     # accounts urls
-    path("admin/", admin.site.urls),
     path("api/auth/", include("dj_rest_auth.urls")),
     path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
     path("api/auth/social/", include("allauth.socialaccount.urls")),
