@@ -47,4 +47,10 @@ urlpatterns = [
         name="schema-swagger-ui",
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    # accounts urls
+    path("admin/", admin.site.urls),
+    path("api/auth/", include("dj_rest_auth.urls")),
+    path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("api/auth/social/", include("allauth.socialaccount.urls")),
+    path("api/users/", include("accounts.urls")),
 ]
