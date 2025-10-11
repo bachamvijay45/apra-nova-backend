@@ -1,5 +1,5 @@
 from allauth.socialaccount.models import SocialAccount
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -152,3 +152,30 @@ def logout(request):
             {"error": "Invalid token"},
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def custom_login(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+
+    if not email or not password:
+        return Response({"error": "Email and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = authenticate(request, username=email, password=password)
+    if user is None:
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Generate tokens
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    refresh_token = str(refresh)
+
+    serializer = UserSerializer(user)
+
+    return Response({
+        "access": access_token,
+        "refresh": refresh_token,
+        "user": serializer.data,
+    })
