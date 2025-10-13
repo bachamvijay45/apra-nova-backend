@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import CustomUser
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +18,23 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
         data['role'] = user.role
         data['redirect_url'] = f"/{user.role}/dashboard"
         return data
+    
+class CustomRegisterSerializer(RegisterSerializer):
+    name = serializers.CharField(required=True)
+    track = serializers.CharField(required=False, allow_blank=True)
+    role = serializers.CharField(required=True)
+
+    def get_cleaned_data(self):
+        data = super().get_cleaned_data()
+        data['name'] = self.validated_data.get('name', '')
+        data['track'] = self.validated_data.get('track', '')
+        data['role'] = self.validated_data.get('role', '')
+        return data
+    
+    def save(self, request):
+        user = super().save(request)
+        user.name = self.validated_data.get('name', '')
+        user.track = self.validated_data.get('track', '')
+        user.role = self.validated_data.get('role', '')
+        user.save()
+        return user
