@@ -9,4 +9,5 @@ urlpatterns = [
     path("login/", views.custom_login, name="custom_login"),
     path("refresh/", views.refresh_token, name="token-refresh"),
     path("logout/", views.logout, name="logout"),
+    path("check-email/", views.check_email_exists, name="check_email_exists"),
 ]

@@ -179,3 +179,11 @@ def custom_login(request):
         "refresh": refresh_token,
         "user": serializer.data,
     })
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def check_email_exists(request):
+    email = request.data.get("email", "").strip().lower()
+    exists = User.objects.filter(email__iexact=email).exists()
+    return Response({"exists": exists})
