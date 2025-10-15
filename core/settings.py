@@ -190,7 +190,8 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://9f91d0a1.apranovaui-main.pages.dev"
+    "https://9f91d0a1.apranovaui-main.pages.dev",
+    "https://apranovaui-main.pages.dev"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
