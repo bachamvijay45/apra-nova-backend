@@ -15,7 +15,7 @@ User = get_user_model()
 
 class CustomRegisterView(RegisterView):
     serializer_class = CustomRegisterSerializer
-    
+
 def get_tokens_for_user(user):
     """Generate JWT tokens for user"""
     refresh = RefreshToken.for_user(user)
@@ -164,13 +164,38 @@ def logout(request):
 def custom_login(request):
     email = request.data.get("email")
     password = request.data.get("password")
+    role = request.data.get("role")  
 
     if not email or not password:
-        return Response({"error": "Email and password required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Email and password required"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not role:
+        return Response(
+            {"error": "Role is required"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
+    # Authenticate user with credentials
     user = authenticate(request, username=email, password=password)
     if user is None:
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            {"error": "Invalid credentials"}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    # Validate if selected role matches user's actual role
+    if user.role != role:
+        return Response(
+            {
+                "error": "Unauthorized role access",
+                "detail": f"You are registered as '{user.role}' but tried to login as '{role}'",
+                "actual_role": user.role
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
 
     # Generate tokens
     refresh = RefreshToken.for_user(user)
@@ -184,6 +209,7 @@ def custom_login(request):
         "refresh": refresh_token,
         "user": serializer.data,
     })
+
 
 
 @api_view(["POST"])
