@@ -2,7 +2,9 @@ from rest_framework import serializers
 from .models import CustomUser
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
+import logging
 
+logger = logging.getLogger(__name__)
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -32,7 +34,9 @@ class CustomRegisterSerializer(RegisterSerializer):
         return data
     
     def save(self, request):
+        print("********* RegisterSerializer Save called: ", self.validated_data.get('role'))
         user = super().save(request)
+        logger.debug(f"Saving user with role: {self.validated_data.get('role')}")
         user.name = self.validated_data.get('name', '')
         user.track = self.validated_data.get('track', '')
         user.role = self.validated_data.get('role', '')

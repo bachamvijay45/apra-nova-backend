@@ -6,11 +6,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-
+from dj_rest_auth.registration.views import RegisterView
+from .serializers import CustomRegisterSerializer
 from .serializers import UserSerializer
 
 User = get_user_model()
 
+
+class CustomRegisterView(RegisterView):
+    serializer_class = CustomRegisterSerializer
+    
 def get_tokens_for_user(user):
     """Generate JWT tokens for user"""
     refresh = RefreshToken.for_user(user)

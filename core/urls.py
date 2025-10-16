@@ -24,7 +24,7 @@ from dj_rest_auth.registration.views import SocialConnectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-
+from accounts.views import CustomRegisterView
 
 # Google OAuth
 class GoogleLogin(SocialLoginView):
@@ -66,6 +66,9 @@ urlpatterns = [
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     # accounts urls
+
+    path("api/auth/registration/", CustomRegisterView.as_view(), name="custom_register"),
+
     path("api/auth/", include("dj_rest_auth.urls")),
     path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
     path("api/auth/social/", include("allauth.socialaccount.urls")),
