@@ -218,3 +218,9 @@ def check_email_exists(request):
     email = request.data.get("email", "").strip().lower()
     exists = User.objects.filter(email__iexact=email).exists()
     return Response({"exists": exists})
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """Health check endpoint for deployment monitoring"""
+    return Response({"status": "healthy"}, status=status.HTTP_200_OK)
