@@ -25,6 +25,8 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from accounts.views import CustomRegisterView
+from accounts.views import health_check
+
 
 # Google OAuth
 class GoogleLogin(SocialLoginView):
@@ -46,6 +48,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 urlpatterns = [
+    path('health', health_check, name='health-check'),
     path("admin/", admin.site.urls),
     # path('api/', include('your_app.urls')),  # <-- your APIs here
     
