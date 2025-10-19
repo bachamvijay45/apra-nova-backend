@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, workspace_views
 
 urlpatterns = [
     path("profile/", views.get_user_profile, name="user-profile"),
@@ -10,4 +10,5 @@ urlpatterns = [
     path("refresh/", views.refresh_token, name="token-refresh"),
     path("logout/", views.logout, name="logout"),
     path("check-email/", views.check_email_exists, name="check_email_exists"),
+    path("workspace/create/", workspace_views.create_workspace, name="create_workspace"),
 ]

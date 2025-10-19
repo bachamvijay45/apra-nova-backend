@@ -73,7 +73,6 @@ urlpatterns = [
     path("api/auth/registration/", CustomRegisterView.as_view(), name="custom_register"),
 
     path("api/auth/", include("dj_rest_auth.urls")),
-    path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
     path("api/auth/social/", include("allauth.socialaccount.urls")),
     path("api/users/", include("accounts.urls")),
 ]
