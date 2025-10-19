@@ -27,15 +27,23 @@ def create_workspace(request):
         container.reload()
         if container.status == "running":
             return Response(
-                {"url": f"http://localhost:{container.attrs['HostConfig']['PortBindings']['8080/tcp'][0]['HostPort']}"},
+                {"url": f"http://workspace-{user.id}.apranova.com"},
                 status=status.HTTP_200_OK,
             )
+            # return Response(
+            #     {"url": f"http://localhost:{container.attrs['HostConfig']['PortBindings']['8080/tcp'][0]['HostPort']}"},
+            #     status=status.HTTP_200_OK,
+            # )
         else:
             container.start()
             return Response(
-                {"url": f"http://localhost:{container.attrs['HostConfig']['PortBindings']['8080/tcp'][0]['HostPort']}"},
+                {"url": f"http://workspace-{user.id}.apranova.com"},
                 status=status.HTTP_200_OK,
             )
+            # return Response(
+            #     {"url": f"http://localhost:{container.attrs['HostConfig']['PortBindings']['8080/tcp'][0]['HostPort']}"},
+            #     status=status.HTTP_200_OK,
+            # )
     except docker.errors.NotFound:
         port = get_free_port()
         user_volume = f"/data/workspaces/{user.id}"
@@ -52,10 +60,10 @@ def create_workspace(request):
             },
             volumes={user_volume: {"bind": "/home/coder/project", "mode": "rw"}},
             labels={"VIRTUAL_HOST": f"workspace-{user.id}.apranova.com"},
-            network="proxy",  # Connect to the proxy network
+            network="proxy1",  # Connect to the proxy network
             restart_policy={"Name": "unless-stopped"},
         )
-        url = f"https://workspace-{user.id}.apranova.com"
+        url = f"http://workspace-{user.id}.apranova.com"
         return Response(
             {"url": url, "msg": "Workspace created successfully."},
             status=status.HTTP_201_CREATED,
