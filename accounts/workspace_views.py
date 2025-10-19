@@ -60,7 +60,7 @@ def create_workspace(request):
             },
             volumes={user_volume: {"bind": "/home/coder/project", "mode": "rw"}},
             labels={"VIRTUAL_HOST": f"workspace-{user.id}.apranova.com"},
-            network="proxy1",  # Connect to the proxy network
+            network="proxy",  # Connect to the proxy network
             restart_policy={"Name": "unless-stopped"},
         )
         url = f"http://workspace-{user.id}.apranova.com"
