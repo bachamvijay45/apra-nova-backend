@@ -15,26 +15,27 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from dj_rest_auth.registration.views import SocialConnectView, SocialLoginView
 from django.contrib import admin
 from django.urls import include, path, re_path
-from dj_rest_auth.registration.views import SocialLoginView
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
-from dj_rest_auth.registration.views import SocialConnectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-from accounts.views import CustomRegisterView
-from accounts.views import health_check
+
+from accounts.views import CustomRegisterView, health_check
 
 
 # Google OAuth
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
 
-# GitHub OAuth  
+
+# GitHub OAuth
 class GitHubLogin(SocialLoginView):
     adapter_class = GitHubOAuth2Adapter
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -48,14 +49,12 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 urlpatterns = [
-    path('health', health_check, name='health-check'),
+    path("health", health_check, name="health-check"),
     path("admin/", admin.site.urls),
     # path('api/', include('your_app.urls')),  # <-- your APIs here
-    
     # Social auth endpoints
     path("api/auth/google/", GoogleLogin.as_view(), name="google_login"),
     path("api/auth/github/", GitHubLogin.as_view(), name="github_login"),
-
     # Swagger / ReDoc documentation
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
@@ -69,10 +68,11 @@ urlpatterns = [
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     # accounts urls
-
-    path("api/auth/registration/", CustomRegisterView.as_view(), name="custom_register"),
-
+    path(
+        "api/auth/registration/", CustomRegisterView.as_view(), name="custom_register"
+    ),
     path("api/auth/", include("dj_rest_auth.urls")),
     path("api/auth/social/", include("allauth.socialaccount.urls")),
     path("api/users/", include("accounts.urls")),
+    path("api/payments/", include("payments.urls")),
 ]
