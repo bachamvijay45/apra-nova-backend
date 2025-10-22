@@ -205,6 +205,8 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_UNIQUE_EMAIL = True
 
+# Skip intermediate allauth pages - directly redirect to OAuth provider
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Social Auth Providers Configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -238,7 +240,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Redirect URLs
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
-LOGIN_REDIRECT_URL = f"{FRONTEND_URL}/auth/callback"
+LOGIN_REDIRECT_URL = "/accounts/oauth/callback/"  # Our custom callback handler
 ACCOUNT_LOGOUT_REDIRECT_URL = FRONTEND_URL
 
 

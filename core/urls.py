@@ -26,6 +26,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from accounts.views import CustomRegisterView
 from accounts.views import health_check
+from accounts.oauth_views import oauth_callback_handler
 
 
 # Google OAuth
@@ -50,9 +51,14 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('health', health_check, name='health-check'),
     path("admin/", admin.site.urls),
-    # path('api/', include('your_app.urls')),  # <-- your APIs here
     
-    # Social auth endpoints
+    # OAuth callback handler (redirect to frontend with tokens)
+    path("accounts/oauth/callback/", oauth_callback_handler, name="oauth_callback"),
+    
+    # Allauth social account URLs (for OAuth redirects)
+    path("accounts/", include("allauth.urls")),
+    
+    # Social auth endpoints (for POST with tokens - API based)
     path("api/auth/google/", GoogleLogin.as_view(), name="google_login"),
     path("api/auth/github/", GitHubLogin.as_view(), name="github_login"),
 
