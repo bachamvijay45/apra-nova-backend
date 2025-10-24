@@ -13,12 +13,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 import dj_database_url
+import stripe
 from decouple import config
 # JWT Settings
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+
+stripe.api_key = STRIPE_SECRET_KEY
 
 
 # Quick-start development settings - unsuitable for production
@@ -64,6 +69,8 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     # Your custom apps
     "accounts",
+    # stripe
+    "payments",
 ]
 
 MIDDLEWARE = [

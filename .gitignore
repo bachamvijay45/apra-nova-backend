@@ -42,3 +42,6 @@ __pycache__/
 # Migrations cache
 *.py~
 " > .gitignore
+
+# SSL certs
+certs/
