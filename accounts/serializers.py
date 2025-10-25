@@ -26,6 +26,12 @@ class CustomRegisterSerializer(RegisterSerializer):
     track = serializers.CharField(required=False, allow_blank=True)
     role = serializers.CharField(required=True)
 
+    def validate_role(self, value):
+        """Prevent superadmin role from being assigned during registration"""
+        if value == "superadmin":
+            raise serializers.ValidationError("SuperAdmin role cannot be assigned through registration")
+        return value
+
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
         data['name'] = self.validated_data.get('name', '')

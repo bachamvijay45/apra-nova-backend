@@ -101,7 +101,7 @@ def update_user_role(request):
     """Update user role (for testing/admin purposes)"""
     role = request.data.get("role")
 
-    if role not in ["student", "teacher", "admin"]:
+    if role not in ["student", "teacher", "admin", "superadmin"]:
         return Response({"error": "Invalid role"}, status=status.HTTP_400_BAD_REQUEST)
 
     request.user.role = role
@@ -187,7 +187,8 @@ def custom_login(request):
         )
 
     # Validate if selected role matches user's actual role
-    if user.role != role:
+    # SuperAdmin can login with any role selection
+    if user.role != role and user.role != "superadmin":
         return Response(
             {
                 "error": "Unauthorized role access",
@@ -208,6 +209,7 @@ def custom_login(request):
         "access": access_token,
         "refresh": refresh_token,
         "user": serializer.data,
+        "redirect_url": f"/{user.role}/dashboard",
     })
 
 
