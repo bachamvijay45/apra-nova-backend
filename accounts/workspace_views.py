@@ -5,7 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-client = docker.from_env()
+def get_docker_client():
+    """Get Docker client lazily to avoid startup errors when Docker is not available"""
+    try:
+        return docker.from_env()
+    except Exception as e:
+        return None
 
 def get_free_port():
     """Find an available port for user container."""
@@ -19,6 +24,13 @@ def get_free_port():
 @permission_classes([IsAuthenticated])
 def create_workspace(request):
     """Provision code-server container for the user"""
+    client = get_docker_client()
+    if client is None:
+        return Response(
+            {"error": "Docker is not available on this server. Workspace feature requires Docker."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     user = request.user
     container_name = f"workspace_{user.id}"
     try:
