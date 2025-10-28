@@ -199,7 +199,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://9f91d0a1.apranovaui-main.pages.dev",
     "https://apranovaui-main.pages.dev",
-    "https://main.d1y4jib944emzx.amplifyapp.com"
+    "https://main.d1y4jib944emzx.amplifyapp.com",
+    "https://main.d1mmt360isf99v.amplifyapp.com/"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
