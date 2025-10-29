@@ -59,9 +59,9 @@ def create_workspace(request):
             # )
     except docker.errors.NotFound:
         port = get_free_port()
-        user_volume = f"/data/workspaces/{user.id}"
+        user_volume = f"D:/ApraNova/Persistence/data/workspaces/{user.id}"  #Use Docker mounted volumes or your own Local Folder
         container = client.containers.run(
-            "codercom/code-server:latest",
+            "apra-nova-code-server:latest",
             name=container_name,
             detach=True,
             ports={"8080/tcp": port},
