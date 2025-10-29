@@ -37,9 +37,7 @@ SECRET_KEY = config(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS", default="apra-nova-backend-main.onrender.com,localhost,127.0.0.1"
-).split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="apra-nova-backend-main.onrender.com,localhost,169.254.172.3,.amplifyapp.com,127.0.0.1, 8saxivdpb6.ap-south-1.awsapprunner.com").split(",")
 
 
 # Application definition
@@ -199,6 +197,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://9f91d0a1.apranovaui-main.pages.dev",
     "https://apranovaui-main.pages.dev",
+    "https://main.d1y4jib944emzx.amplifyapp.com",
+    "https://main.d1mmt360isf99v.amplifyapp.com"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -212,6 +212,8 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_UNIQUE_EMAIL = True
 
+# Skip intermediate allauth pages - directly redirect to OAuth provider
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Social Auth Providers Configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -245,7 +247,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Redirect URLs
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
-LOGIN_REDIRECT_URL = f"{FRONTEND_URL}/auth/callback"
+LOGIN_REDIRECT_URL = "/accounts/oauth/callback/"  # Our custom callback handler
 ACCOUNT_LOGOUT_REDIRECT_URL = FRONTEND_URL
 
 

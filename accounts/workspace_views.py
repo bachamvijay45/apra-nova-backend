@@ -5,7 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-client = docker.from_env()
+# Only connect to Docker if available (prevents crash on Render)
+try:
+    client = docker.from_env()
+except Exception as e:
+    client = None
+    print(f"Docker not available: {e}")
 
 def get_free_port():
     """Find an available port for user container."""
@@ -19,6 +24,14 @@ def get_free_port():
 @permission_classes([IsAuthenticated])
 def create_workspace(request):
     """Provision code-server container for the user"""
+    
+    # Check if Docker is available
+    if client is None:
+        return Response(
+            {"error": "Workspace feature not available on this server"},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     user = request.user
     container_name = f"workspace_{user.id}"
     try:
@@ -46,9 +59,9 @@ def create_workspace(request):
             # )
     except docker.errors.NotFound:
         port = get_free_port()
-        user_volume = f"/data/workspaces/{user.id}"
+        user_volume = f"D:/ApraNova/Persistence/data/workspaces/{user.id}"  #Use Docker mounted volumes or your own Local Folder
         container = client.containers.run(
-            "codercom/code-server:latest",
+            "apra-nova-code-server:latest",
             name=container_name,
             detach=True,
             ports={"8080/tcp": port},
